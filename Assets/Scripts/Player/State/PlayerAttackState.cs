@@ -39,6 +39,7 @@ public class PlayerAttackState : IPlayerState
 
     private void PlayCombo(PlayerStateMachine player)
     {
+        player.RotateTowardsCameraDirection();
         player.animator.CrossFade($"ATTACK{_comboStep}", 0.1f, 2);
         player.attackPressed = false;
     }

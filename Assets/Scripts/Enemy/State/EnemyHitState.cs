@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class EnemyHitState : MonoBehaviour
+public class EnemyHitState : IEnemyState
 {
-    // Start is called before the first frame update
-    void Start()
+    public void Enter(EnemyStateMachine enemy)
     {
-        
+        enemy.animator.CrossFade("HIT", 0.1f, 0);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Execute(EnemyStateMachine enemy)
     {
-        
+        // 히트 애니메이션 끝나면 Idle로
+        if (enemy.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+            enemy.ChangeState(new EnemyIdleState());
     }
+
+    public void Exit(EnemyStateMachine enemy) { }
 }

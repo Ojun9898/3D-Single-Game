@@ -1,18 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyAttackState : MonoBehaviour
+public class EnemyAttackState : IEnemyState
 {
-    // Start is called before the first frame update
-    void Start()
+    private float attackTimer;
+    private float attackCooldown = 1.5f;
+
+    public void Enter(EnemyStateMachine enemy)
     {
-        
+        attackTimer = 0f;
+        enemy.agent.isStopped = true;
+        enemy.animator.CrossFade("ATTACK", 0.1f, 0);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Execute(EnemyStateMachine enemy)
     {
-        
+        attackTimer += Time.deltaTime;
+        if (attackTimer >= attackCooldown)
+        {
+            // 공격 데미지 처리
+            // if (Vector3.Distance(...) < ...) ...
+            enemy.ChangeState(new EnemyIdleState());
+        }
     }
+
+    public void Exit(EnemyStateMachine enemy) { }
 }

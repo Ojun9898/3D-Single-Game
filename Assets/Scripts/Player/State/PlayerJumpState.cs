@@ -14,14 +14,15 @@ public class PlayerJumpState : IPlayerState
         if (move.magnitude > 0.1f)
         {
             player.controller.Move(move * (player.moveSpeed * Time.deltaTime));
-            Quaternion targetRotation = Quaternion.LookRotation(move);
-            player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, player.rotationSpeed * Time.deltaTime);
+            player.RotateTowardsCameraDirection();
         }
 
         if (player.controller.isGrounded)
         {
             if (player.moveInput.magnitude > 0.1f)
                 player.ChangeState(new PlayerMoveState());
+            else if (player.runPressed)
+                player.ChangeState(new PlayerRunState());
             else
                 player.ChangeState(new PlayerIdleState());
         }

@@ -10,18 +10,22 @@ public class PlayerStateMachine : MonoBehaviour
     [HideInInspector] public Animator animator;
     [HideInInspector] public CharacterController controller;
 
-    public float moveSpeed = 5f;
+    public float moveSpeed = 10f;
     public float rotationSpeed = 10f;
     public float gravity = -9.8f;
     public Vector3 velocity;
-
+    
+    public float currentMoveSpeed;
+    
     [HideInInspector] public bool attackPressed;
     [HideInInspector] public bool jumpPressed;
+    [HideInInspector] public bool runPressed;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        currentMoveSpeed = moveSpeed;
 
         ChangeState(new PlayerIdleState());
     }
@@ -54,10 +58,41 @@ public class PlayerStateMachine : MonoBehaviour
         if (CurrentState != null)
             CurrentState.Enter(this);
     }
+    
+    public Vector3 GetCameraRelativeMoveDirection()
+    {
+        Vector3 inputDir = new Vector3(moveInput.x, 0f, moveInput.y);
+
+        Vector3 camForward = GameManager.Instance.CameraTransform.forward;
+        Vector3 camRight = GameManager.Instance.CameraTransform.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
+
+        return camForward * inputDir.z + camRight * inputDir.x;
+    }
+    
+    public void RotateTowardsCameraDirection()
+    {
+        Vector3 targetDir = GetCameraRelativeMoveDirection();
+
+        if (targetDir.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(targetDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+    }
 
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
+    }
+    
+    public void OnRun(InputAction.CallbackContext context)
+    {
+        runPressed = context.ReadValueAsButton();
     }
 
     public void OnJump(InputAction.CallbackContext context)

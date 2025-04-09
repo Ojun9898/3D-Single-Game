@@ -23,19 +23,25 @@ public class PlayerMoveState : IPlayerState
             return;
         }
 
-        Vector3 move = new Vector3(player.moveInput.x, 0, player.moveInput.y);
+        Vector3 moveDir = player.GetCameraRelativeMoveDirection();
 
-        if (move.magnitude > 0.1f)
+        if (moveDir.magnitude > 0.1f)
         {
-            player.controller.Move(move * (player.moveSpeed * Time.deltaTime));
-            Quaternion targetRotation = Quaternion.LookRotation(move);
-            player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, player.rotationSpeed * Time.deltaTime);
+            if (player.runPressed)
+            {
+                player.ChangeState(new PlayerRunState());
+                return;
+            }
+            
+            player.RotateTowardsCameraDirection();
+            player.controller.Move(moveDir.normalized * (player.currentMoveSpeed * Time.deltaTime));
         }
         else
         {
             player.ChangeState(new PlayerIdleState());
         }
     }
+
 
     public void Exit(PlayerStateMachine player) { }
 }
